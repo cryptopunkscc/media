@@ -139,6 +139,7 @@ func nextChange(ctx context.Context, sub *indexingClient.Subscription, logger *l
 		case <-ticker.C:
 			logger.Logv(1, "waiting for indexing changes")
 		case <-ctx.Done():
+			_ = sub.Close()
 			return nil, ctx.Err()
 		}
 	}

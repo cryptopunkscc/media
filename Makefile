@@ -8,7 +8,8 @@ build:
 	mkdir -p $(BUILD_DIR)
 	go build -o $(BIN) ./cmd/media
 
-run:
+
+run: build
 	go run ./cmd/media
 
 clean:

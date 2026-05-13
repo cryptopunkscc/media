@@ -10,6 +10,7 @@ require (
 )
 
 require (
+
 	github.com/akutz/memconn v0.1.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
