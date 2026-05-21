@@ -44,7 +44,9 @@ func main() {
 		WithIdentity(id).
 		WithZone(astral.ZoneAll)
 
-	router := app.NewRouter(db, logger)
+	searcher := app.NewObjectSearcher(db)
+	describer := app.NewObjectDescriber(db)
+	router := app.NewRouter(db, logger, searcher, describer)
 
 	indexer := app.NewIndexer(db, logger)
 	var (
@@ -67,7 +69,12 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		if err := apps.Serve(astralCtx, router); err != nil && !errors.Is(err, context.Canceled) {
+		if err := apps.Serve(
+			astralCtx,
+			router,
+			apps.WithObjectSearcher(searcher),
+			apps.WithObjectDescriber(describer),
+		); err != nil && !errors.Is(err, context.Canceled) {
 			once.Do(func() {
 				firstErr = err
 				stop()

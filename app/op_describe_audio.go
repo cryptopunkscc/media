@@ -7,7 +7,6 @@ import (
 	"github.com/cryptopunkscc/astrald/astral/channel"
 	"github.com/cryptopunkscc/astrald/lib/routing"
 	"github.com/cryptopunkscc/astrald/mod/objects"
-	"gorm.io/gorm"
 )
 
 type describeAudioArgs struct {
@@ -15,24 +14,23 @@ type describeAudioArgs struct {
 	Out string           `query:"optional"`
 }
 
-func (ops *AudioOps) Describe(_ *astral.Context, q *routing.IncomingQuery, args describeAudioArgs) error {
+func (ops *AudioOps) Describe(ctx *astral.Context, q *routing.IncomingQuery, args describeAudioArgs) error {
 	ch := q.Accept(channel.WithOutputFormat(args.Out))
 	defer ch.Close()
 
-	row, err := ops.db.FindAudio(args.ID)
+	descriptors, err := ops.describer.DescribeObject(ctx, args.ID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, objects.ErrNotFound) {
 			return ch.Send(astral.Err(objects.ErrNotFound))
 		}
 		return ch.Send(astral.Err(err))
 	}
 
-	if err := ch.Send(&objects.Descriptor{
-		SourceID: q.Target(),
-		ObjectID: args.ID,
-		Data:     row.ToAudioFile(),
-	}); err != nil {
-		return err
+	for descriptor := range descriptors {
+		descriptor.SourceID = q.Target()
+		if err := ch.Send(descriptor); err != nil {
+			return err
+		}
 	}
 
 	return ch.Send(&astral.EOS{})
