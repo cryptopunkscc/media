@@ -74,6 +74,7 @@ func main() {
 			router,
 			apps.WithObjectSearcher(searcher),
 			apps.WithObjectDescriber(describer),
+			apps.WithBlueprintSync(),
 		); err != nil && !errors.Is(err, context.Canceled) {
 			once.Do(func() {
 				firstErr = err
